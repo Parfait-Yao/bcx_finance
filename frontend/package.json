@@ -1,0 +1,50 @@
+{
+  "name": "bcx-finance-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development next dev",
+    "build": "cross-env NODE_ENV=production next build",
+    "start": "cross-env NODE_ENV=production next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
+    "axios": "^1.7.7",
+    "country-flag-icons": "^1.6.17",
+    "country-state-city": "^3.2.1",
+    "d3-geo": "^3.1.1",
+    "lucide-react": "^0.460.0",
+    "next": "^15.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-select": "^5.10.2",
+    "recharts": "^2.13.0",
+    "three": "^0.160.1",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2",
+    "world-countries": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/d3-geo": "^3.1.0",
+    "@types/node": "^20.16.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.184.1",
+    "@types/topojson-client": "^3.1.5",
+    "autoprefixer": "^10.4.20",
+    "cross-env": "^10.1.0",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.0.3",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.6.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss-load-config": "^4.0.2"
+    }
+  }
+}

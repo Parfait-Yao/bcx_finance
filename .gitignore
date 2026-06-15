@@ -1,0 +1,25 @@
+# Dépendances
+**/node_modules/
+
+# Builds
+backend/dist/
+frontend/.next/
+frontend/out/
+*.tsbuildinfo
+
+# Variables d'environnement (jamais commitées : contiennent secrets/identifiants)
+.env
+.env.local
+.env*.local
+
+# Fichiers générés (rapports PDF, etc.)
+backend/storage/
+
+# Logs
+*.log
+
+# Système / éditeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,10 @@
+{
+  "name": "BCX Finance",
+  "short_name": "BCX",
+  "description": "Gérez vos recettes, dépenses et votre Score BCX",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#F7F8FA",
+  "theme_color": "#1A5C38",
+  "icons": []
+}
