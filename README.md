@@ -379,6 +379,12 @@ pnpm dev
 
 - Appliquer les migrations Prisma sur la base de production :
   `pnpm exec prisma migrate deploy`
+- **Commande de démarrage** : `nest build` compile vers `dist/src/main.js`
+  (et non `dist/main.js`, car `sourceRoot` est `src`). Sur Render/Railway,
+  la commande de démarrage doit donc être :
+  ```
+  node dist/src/main.js
+  ```
 - Mettre à jour `FRONTEND_URL` côté backend avec l'URL Vercel exacte
 - Les rapports PDF sont générés sur le système de fichiers du backend
   (`backend/storage/reports`) : sur un hébergeur avec système de fichiers
