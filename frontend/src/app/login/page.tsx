@@ -19,28 +19,32 @@ export default function LoginPage() {
     setErreur('');
     setChargement(true);
     try {
-      await login({ telephone, motDePasse });
+      // Normalise le numéro : supprime espaces et tirets, garde le +
+      // Le numéro doit être saisi avec indicatif (ex: +2250700000000)
+      // pour correspondre exactement à ce qui a été enregistré à l'inscription.
+      const numeroNormalise = telephone.replace(/[\s\-]/g, '');
+      await login({ telephone: numeroNormalise, motDePasse });
     } catch {
-      setErreur('Téléphone ou mot de passe incorrect.');
+      setErreur('Numéro de téléphone ou mot de passe incorrect.');
     } finally {
       setChargement(false);
     }
   }
 
   return (
-    <main className="min-h-screen lg:flex">
-      {/* Panneau visuel (desktop uniquement) */}
+    <main className="min-h-screen flex flex-col lg:flex-row">
+      {/* Panneau visuel masqué sur mobile */}
       <AuthVisual
         titre="Bienvenue de retour sur votre tableau de bord financier"
         description="Suivez vos recettes, vos dépenses et l'évolution de votre Score BCX en un coup d'œil, où que vous soyez en Afrique."
         image="https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1200&auto=format&fit=crop"
-        imageAlt="Jeune femme africaine souriante tenant son téléphone, se connectant à BCX Finance"
+        imageAlt="Jeune femme africaine souriante tenant son téléphone"
       />
 
-      {/* Formulaire */}
-      <div className="flex-1 flex items-center justify-center px-4 py-10 lg:py-0 animate-fade-up">
+      {/* Formulaire — scrollable sur mobile */}
+      <div className="flex-1 flex items-start lg:items-center justify-center px-4 py-10 lg:py-0 overflow-y-auto">
         <div className="w-full max-w-md">
-          {/* En-tête mobile uniquement */}
+          {/* Logo mobile */}
           <div className="lg:hidden text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-primaire">
               <span className="w-10 h-10 rounded-bouton bg-primaire text-white flex items-center justify-center">
@@ -50,7 +54,6 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          {/* Lien retour (desktop) */}
           <Link href="/" className="hidden lg:inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-primaire transition-colors mb-8">
             <ArrowLeft size={14} />
             Retour à l&apos;accueil
@@ -63,7 +66,9 @@ export default function LoginPage() {
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Téléphone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Numéro de téléphone
+              </label>
               <div className="relative">
                 <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input
@@ -71,16 +76,21 @@ export default function LoginPage() {
                   required
                   value={telephone}
                   onChange={(e) => setTelephone(e.target.value)}
-                  placeholder="07 00 00 00 00"
+                  placeholder="+225 07 00 00 00 00"
                   className="w-full pl-11 pr-4 py-3.5 rounded-bouton border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primaire focus:border-primaire transition-shadow"
                 />
               </div>
+              <p className="text-xs text-gray-400 mt-1">
+                Numéro complet avec indicatif, ex&nbsp;: +225 07 00 00 00 00
+              </p>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
-                <Link href="/forgot-password" className="text-xs font-medium text-primaire hover:underline">Mot de passe oublié ?</Link>
+                <Link href="/forgot-password" className="text-xs font-medium text-primaire hover:underline">
+                  Mot de passe oublié ?
+                </Link>
               </div>
               <PasswordInput
                 required
@@ -91,20 +101,22 @@ export default function LoginPage() {
             </div>
 
             {erreur && (
-              <p className="text-depense text-sm bg-depense/5 border border-depense/20 rounded-bouton px-3 py-2">{erreur}</p>
+              <p className="text-depense text-sm bg-depense/5 border border-depense/20 rounded-bouton px-3 py-2">
+                {erreur}
+              </p>
             )}
 
             <button
               type="submit"
               disabled={chargement}
-              className="w-full bg-primaire text-white font-semibold py-3.5 rounded-bouton hover:bg-[#15492c] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:translate-y-0 shadow-lg shadow-primaire/20"
+              className="w-full bg-primaire text-white font-semibold py-3.5 rounded-bouton hover:bg-[#15492c] transition-all flex items-center justify-center gap-2 disabled:opacity-60 shadow-lg shadow-primaire/20"
             >
               {chargement && <Loader2 className="animate-spin" size={18} />}
               Se connecter
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-8">
+          <p className="text-center text-sm text-gray-500 mt-8 pb-6">
             Pas encore de compte ?{' '}
             <Link href="/register" className="text-primaire font-semibold hover:underline">
               Créer un compte

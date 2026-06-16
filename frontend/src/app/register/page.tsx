@@ -92,8 +92,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen lg:flex">
-      {/* Panneau visuel (desktop uniquement) */}
+    <main className="min-h-screen flex flex-col lg:flex-row">
+      {/* Panneau visuel masqué sur mobile */}
       <AuthVisual
         titre="Donnez à votre activité la crédibilité qu'elle mérite"
         description="En quelques minutes, créez votre compte et commencez à construire votre historique financier et votre Score BCX."
@@ -101,9 +101,9 @@ export default function RegisterPage() {
         imageAlt="Entrepreneur africain s'inscrivant sur BCX Finance depuis son téléphone"
       />
 
-      {/* Formulaire */}
-      <div className="flex-1 flex items-center justify-center px-4 py-10 animate-fade-up">
-        <div className="w-full max-w-lg">
+      {/* Formulaire — scrollable sur mobile */}
+      <div className="flex-1 flex items-start lg:items-center justify-center px-4 py-10 overflow-y-auto">
+        <div className="w-full max-w-lg pb-6">
           {/* En-tête mobile uniquement */}
           <div className="lg:hidden text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl text-primaire">
@@ -142,7 +142,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Pays : recherche + sélection, met à jour l'indicatif et les villes */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Pays</label>
