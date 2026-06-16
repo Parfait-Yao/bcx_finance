@@ -38,24 +38,44 @@ export default function NavBar() {
         })}
       </aside>
 
-      {/* Barre de navigation mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-carte border-t border-gray-100 flex justify-around items-center py-2 z-40 shadow-[0_-2px_10px_rgba(0,0,0,0.04)]">
-        {LIENS.map(({ href, label, icone: Icone }) => {
-          const actif = pathname === href;
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-bouton transition-all ${
-                actif ? 'text-primaire' : 'text-gray-400'
-              }`}
-            >
-              <Icone size={22} />
-              <span className="text-[10px] font-medium">{label}</span>
-            </Link>
-          );
-        })}
+      {/* Barre de navigation mobile — fixée en bas de l'écran.
+          On utilise :
+          - `fixed` au lieu de `sticky` pour qu'elle reste en place
+            même quand la barre d'adresse du navigateur se rétracte
+          - `pb-safe` (padding-bottom: env(safe-area-inset-bottom)) pour
+            respecter l'encoche/home indicator sur iPhone X et suivants
+          - `translate-z-0` force un nouveau contexte de rendu GPU,
+            évitant les sauts sur certains Android */}
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-carte border-t border-gray-100 shadow-[0_-2px_12px_rgba(0,0,0,0.06)]"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', transform: 'translateZ(0)' }}
+      >
+        <div className="flex justify-around items-center py-2">
+          {LIENS.map(({ href, label, icone: Icone }) => {
+            const actif = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex flex-col items-center gap-1 px-3 py-1 rounded-bouton transition-all min-w-[56px] ${
+                  actif ? 'text-primaire' : 'text-gray-400'
+                }`}
+              >
+                <Icone size={22} />
+                <span className="text-[10px] font-medium leading-tight">{label}</span>
+              </Link>
+            );
+          })}
+        </div>
       </nav>
+
+      {/* Espace réservé en bas pour que le contenu ne passe pas
+          sous la barre de navigation sur mobile */}
+      <div
+        className="md:hidden h-16"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        aria-hidden="true"
+      />
     </>
   );
 }

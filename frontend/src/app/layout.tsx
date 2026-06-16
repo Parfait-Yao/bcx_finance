@@ -18,6 +18,11 @@ export const metadata: Metadata = {
 // Couleur de la barre de statut sur mobile
 export const viewport: Viewport = {
   themeColor: '#1A5C38',
+  // viewport-fit=cover permet d'utiliser env(safe-area-inset-bottom)
+  // pour la barre de navigation sur iPhones avec encoche/Dynamic Island
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

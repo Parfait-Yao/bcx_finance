@@ -4,12 +4,20 @@
 
 html {
   scroll-behavior: smooth;
+  /* Utilise la hauteur dynamique du viewport (dvh) sur mobile :
+     tient compte de la barre d'adresse rétractable du navigateur.
+     Sans ça, la barre de navigation fixe "saute" quand la barre
+     d'adresse apparaît/disparaît en scrollant. */
+  height: -webkit-fill-available;
 }
 
 body {
   background-color: #f7f8fa;
   color: #1a1a1a;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  /* Fallback pour navigateurs ne supportant pas dvh */
+  min-height: -webkit-fill-available;
 }
 
 /* Décale les ancres sous l'en-tête fixe de la landing page */
