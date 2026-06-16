@@ -68,7 +68,7 @@ export default function AiAssistant() {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+    <div className="fixed bottom-5 left-5 sm:left-auto sm:right-5 z-40 flex flex-col items-end">
       {/* Panneau de discussion */}
       <div
         className={`mb-3 w-[22rem] max-w-[calc(100vw-2.5rem)] bg-white rounded-carte shadow-2xl border border-gray-100 flex flex-col overflow-hidden origin-bottom-right transition-all duration-300 ease-out ${
