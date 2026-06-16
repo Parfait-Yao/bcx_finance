@@ -22,3 +22,27 @@ section[id] {
   transition-property: background-color, border-color, color, transform, box-shadow;
   transition-duration: 200ms;
 }
+
+/* Garantit que les éléments animés sont toujours visibles et cliquables,
+   même si l'animation CSS ne se lance pas (mobile, économie d'énergie,
+   préférence prefers-reduced-motion, etc.). Sans ce fallback, les éléments
+   qui partent à opacity:0 peuvent rester invisibles sur certains mobiles. */
+.animate-fade-up,
+.animate-fade-up-lg,
+.animate-fade-down,
+.animate-fade-left,
+.animate-fade-right {
+  opacity: 1 !important;
+}
+
+/* Respect de la préférence d'accessibilité "réduire les animations" */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-up-lg,
+  .animate-fade-down,
+  .animate-fade-left,
+  .animate-fade-right {
+    animation: none !important;
+    transform: none !important;
+  }
+}
