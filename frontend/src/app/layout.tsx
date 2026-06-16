@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
+import PageTransition from '@/components/PageTransition';
+import NavigationProgress from '@/components/NavigationProgress';
 
 export const metadata: Metadata = {
   title: 'BCX Finance',
@@ -28,8 +30,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="bg-fond min-h-screen">
+        <NavigationProgress />
         <ServiceWorkerRegister />
-        {children}
+        <PageTransition>
+          {children}
+        </PageTransition>
       </body>
     </html>
   );
