@@ -7,10 +7,14 @@ import { LoginDto } from "./dto/login.dto";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 
+// En production (domaines différents : vercel.app ≠ onrender.com), les
+// cookies cross-site nécessitent sameSite: 'none' + secure: true.
+// En développement (même origine localhost), sameSite: 'lax' suffit.
+const estProduction = process.env.NODE_ENV === "production";
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
+  secure: estProduction,
+  sameSite: (estProduction ? "none" : "lax") as "none" | "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
 };
 

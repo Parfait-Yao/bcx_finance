@@ -13,15 +13,15 @@ async function bootstrap() {
   app.use(compression());
   app.use(cookieParser());
 
-  // CORS : autorise le frontend configuré, ainsi que tout port localhost
-  // en développement (le serveur Next.js change parfois de port — 3000,
-  // 3001, 3002... — si le port par défaut est déjà occupé).
+  // CORS : autorise le frontend configuré, tous les sous-domaines Vercel
+  // (previews de déploiement inclus), et tout localhost en développement.
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true); // requêtes sans Origin (ex: curl, Postman)
+      if (!origin) return callback(null, true); // curl, Postman, SSR
       const estLocalhost = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
-      if (origin === frontendUrl || estLocalhost) {
+      const estVercel = /^https:\/\/.*\.vercel\.app$/.test(origin);
+      if (origin === frontendUrl || estLocalhost || estVercel) {
         return callback(null, true);
       }
       callback(new Error(`Origine non autorisée par CORS : ${origin}`));
