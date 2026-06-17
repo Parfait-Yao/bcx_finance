@@ -20,7 +20,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <MobileHeader />
 
       {/* Contenu principal scrollable */}
-      <div className="md:pl-60 pb-24 md:pb-8">
+      {/* pt-16 md:pt-0 : espace pour le header mobile fixe (64px) */}
+      <div className="md:pl-60 pt-16 md:pt-0 pb-24 md:pb-8">
         <PageTransition>
           {children}
         </PageTransition>

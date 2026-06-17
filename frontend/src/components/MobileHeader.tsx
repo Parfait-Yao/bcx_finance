@@ -24,7 +24,9 @@ export default function MobileHeader() {
   const titre = TITRES_PAGE[pathname] ?? 'BCX Finance';
 
   return (
-    <header className="md:hidden sticky top-0 z-40 bg-carte border-b border-gray-100 shadow-sm px-4 py-3 flex items-center justify-between gap-3">
+    <header className="md:hidden fixed top-0 left-0 right-0 z-40 bg-carte border-b border-gray-100 shadow-sm px-4 py-3 flex items-center justify-between gap-3"
+      style={{ transform: 'translateZ(0)' }}
+    >
       {/* Titre de la page courante */}
       <div className="min-w-0">
         <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide leading-none mb-0.5">

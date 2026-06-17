@@ -31,21 +31,14 @@ export default function DashboardPage() {
   return (
     <main className="max-w-4xl mx-auto px-4 pt-6 space-y-6">
 
-      {/* Header de bienvenue — affiche le nom et l'entreprise */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm text-gray-500 font-medium">Bonjour 👋</p>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 truncate">
-            {data.nom}
-          </h1>
-          {data.entreprise && (
-            <p className="text-xs sm:text-sm text-gray-400 truncate">{data.entreprise}</p>
-          )}
-        </div>
-        {/* Avatar avec initiales */}
-        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-primaire text-white flex items-center justify-center font-bold text-base sm:text-lg shrink-0 shadow-md">
-          {data.nom.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()}
-        </div>
+      <div className="min-w-0">
+        <p className="text-sm text-gray-500 font-medium">Bonjour 👋</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 truncate">
+          {data.nom}
+        </h1>
+        {data.entreprise && (
+          <p className="text-xs sm:text-sm text-gray-400 truncate">{data.entreprise}</p>
+        )}
       </div>
 
       <div className="bg-gradient-to-br from-primaire to-[#2E7D32] rounded-carte shadow-md p-6 flex items-center justify-between flex-wrap gap-4">
