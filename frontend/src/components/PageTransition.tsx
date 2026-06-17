@@ -22,9 +22,13 @@ export default function PageTransition({ children }: { children: React.ReactNode
   return (
     <div
       style={{
+        // On utilise UNIQUEMENT opacity — pas de transform.
+        // Sur Safari iOS, tout élément `position: fixed` à l'intérieur
+        // d'un conteneur avec `transform` perd son comportement fixed
+        // et devient relatif au conteneur. La navbar "saute" donc à
+        // chaque transition. Avec opacity seul, ce bug n'existe pas.
         opacity: afficher ? 1 : 0,
-        transform: afficher ? 'translateY(0)' : 'translateY(8px)',
-        transition: 'opacity 0.3s ease, transform 0.3s ease',
+        transition: 'opacity 0.25s ease',
       }}
     >
       {children}
