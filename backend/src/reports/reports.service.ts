@@ -237,8 +237,8 @@ export class ReportsService {
     return { recettesMoisPrecedents, moyennesDepensesParCategorie };
   }
 
-  // Génère (ou régénère) le fichier PDF du rapport et retourne son chemin absolu
-  async genererPdf(reportId: string, userId: string) {
+  // Génère le PDF du rapport en mémoire et retourne un Buffer prêt à streamer
+  async genererPdf(reportId: string, userId: string): Promise<Buffer> {
     const report = await this.prisma.report.findUnique({
       where: { id: reportId },
       include: { insights: true, user: true },
@@ -255,7 +255,8 @@ export class ReportsService {
       orderBy: { dateTransaction: 'asc' },
     });
 
-    const cheminRelatif = await this.pdfService.genererPdfRapport(report.id, {
+    // Génère le PDF en mémoire (Buffer), sans écrire sur le disque
+    return this.pdfService.genererPdfRapport({
       user: {
         nom: report.user.nom,
         telephone: report.user.telephone,
@@ -277,9 +278,5 @@ export class ReportsService {
       })),
       insights: report.insights.map((i) => ({ niveau: i.niveau, message: i.message })),
     });
-
-    await this.prisma.report.update({ where: { id: report.id }, data: { fichierPdf: cheminRelatif } });
-
-    return this.pdfService.cheminAbsoluDepuisRelatif(cheminRelatif);
   }
 }

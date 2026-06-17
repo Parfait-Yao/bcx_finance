@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import * as puppeteer from 'puppeteer';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as PDFDocument from 'pdfkit';
 
-interface UserInfo {
+// Types de données nécessaires pour construire le PDF
+export interface UserInfoPdf {
   nom: string;
   telephone: string;
   entreprise: string;
   ville: string;
 }
 
-interface TransactionLigne {
+export interface TransactionPdf {
   date: string;
   type: 'recette' | 'depense';
   categorie: string;
@@ -18,175 +17,189 @@ interface TransactionLigne {
   montant: number;
 }
 
-interface InsightLigne {
+export interface InsightPdf {
   niveau: string;
   message: string;
 }
 
-interface DonneesRapportPdf {
-  user: UserInfo;
+export interface DonneesRapportPdf {
+  user: UserInfoPdf;
   mois: number;
   annee: number;
   totalRecettes: number;
   totalDepenses: number;
   soldeNet: number;
   scoreBcx: number;
-  transactions: TransactionLigne[];
-  insights: InsightLigne[];
+  transactions: TransactionPdf[];
+  insights: InsightPdf[];
 }
 
 const NOMS_MOIS = [
-  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+  'Janvier','Février','Mars','Avril','Mai','Juin',
+  'Juillet','Août','Septembre','Octobre','Novembre','Décembre',
 ];
 
-// Formate un montant en "F CFA" avec séparateur de milliers (espace)
 function formatMontant(valeur: number): string {
-  const arrondi = Math.round(valeur);
-  return `${arrondi.toLocaleString('fr-FR').replace(/,/g, ' ')} F CFA`;
+  return `${Math.round(valeur).toLocaleString('fr-FR')} F CFA`;
 }
 
 function interpreterScore(score: number): string {
   if (score >= 70) return 'Bon';
   if (score >= 40) return 'Moyen';
-  return 'À améliorer';
+  return 'A ameliorer';
 }
 
-// Construit le HTML du rapport PDF conforme aux normes bancaires
-function construireHtml(d: DonneesRapportPdf): string {
-  const lignesTransactions = d.transactions
-    .map(
-      (t) => `
-      <tr>
-        <td>${t.date}</td>
-        <td>${t.categorie}</td>
-        <td>${t.description || '-'}</td>
-        <td class="${t.type === 'recette' ? 'recette' : 'depense'}">
-          ${t.type === 'recette' ? '+' : '-'} ${formatMontant(t.montant)}
-        </td>
-      </tr>`,
-    )
-    .join('');
-
-  const lignesInsights = d.insights
-    .map((i) => `<li><strong>[${i.niveau.toUpperCase()}]</strong> ${i.message}</li>`)
-    .join('');
-
-  const dateGeneration = new Date().toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
-
-  return `
-  <!DOCTYPE html>
-  <html lang="fr">
-  <head>
-    <meta charset="utf-8" />
-    <style>
-      body { font-family: Arial, sans-serif; color: #1a1a1a; font-size: 12px; padding: 24px; }
-      h1 { color: #1A5C38; margin-bottom: 4px; }
-      .sous-titre { color: #555; margin-bottom: 24px; }
-      .bloc { margin-bottom: 16px; }
-      table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-      th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; font-size: 11px; }
-      th { background: #1A5C38; color: white; }
-      .recette { color: #2E7D32; font-weight: bold; }
-      .depense { color: #C62828; font-weight: bold; }
-      .score-bloc { background: linear-gradient(135deg, #1A5C38, #2E7D32); color: white; padding: 16px; border-radius: 16px; margin-bottom: 16px; }
-      .score-valeur { font-size: 28px; font-weight: bold; }
-      .footer { margin-top: 32px; font-size: 10px; color: #888; border-top: 1px solid #ddd; padding-top: 8px; }
-      .recap-table td:first-child { font-weight: bold; width: 50%; }
-    </style>
-  </head>
-  <body>
-    <h1>BCX Finance</h1>
-    <div class="sous-titre">Rapport financier mensuel — ${NOMS_MOIS[d.mois - 1]} ${d.annee}</div>
-
-    <div class="bloc">
-      <h3>Identité du commerçant</h3>
-      <table class="recap-table">
-        <tr><td>Nom</td><td>${d.user.nom}</td></tr>
-        <tr><td>Téléphone</td><td>${d.user.telephone}</td></tr>
-        <tr><td>Entreprise</td><td>${d.user.entreprise}</td></tr>
-        <tr><td>Ville</td><td>${d.user.ville}</td></tr>
-      </table>
-    </div>
-
-    <div class="bloc">
-      <h3>Récapitulatif financier</h3>
-      <table class="recap-table">
-        <tr><td>Total des recettes</td><td class="recette">${formatMontant(d.totalRecettes)}</td></tr>
-        <tr><td>Total des dépenses</td><td class="depense">${formatMontant(d.totalDepenses)}</td></tr>
-        <tr><td>Solde net</td><td>${formatMontant(d.soldeNet)}</td></tr>
-      </table>
-    </div>
-
-    <div class="score-bloc">
-      <div>Score BCX</div>
-      <div class="score-valeur">${d.scoreBcx} / 100 — ${interpreterScore(d.scoreBcx)}</div>
-    </div>
-
-    <div class="bloc">
-      <h3>Transactions du mois</h3>
-      <table>
-        <thead>
-          <tr><th>Date</th><th>Catégorie</th><th>Description</th><th>Montant</th></tr>
-        </thead>
-        <tbody>${lignesTransactions || '<tr><td colspan="4">Aucune transaction enregistrée</td></tr>'}</tbody>
-      </table>
-    </div>
-
-    <div class="bloc">
-      <h3>Insights</h3>
-      <ul>${lignesInsights || '<li>Aucun insight généré pour ce mois.</li>'}</ul>
-    </div>
-
-    <div class="footer">
-      Document généré par BCX Finance le ${dateGeneration}.
-    </div>
-  </body>
-  </html>`;
-}
-
-const DOSSIER_STORAGE = path.join(process.cwd(), 'storage', 'reports');
+// Couleurs de la charte BCX Finance
+const VERT_PRIMAIRE = '#1A5C38';
+const VERT_CLAIR = '#2E7D32';
+const ROUGE = '#C62828';
+const GRIS = '#666666';
+const GRIS_CLAIR = '#F5F5F5';
 
 @Injectable()
 export class PdfService {
   /**
-   * Génère le PDF du rapport mensuel avec Puppeteer et le sauvegarde sur disque.
-   * Retourne le chemin relatif du fichier généré.
+   * Génère le PDF du rapport en mémoire avec PDFKit (pas de Chromium,
+   * pas de fichier sur disque — fonctionne sur Render plan gratuit).
+   * Retourne un Buffer prêt à être envoyé en réponse HTTP.
    */
-  async genererPdfRapport(reportId: string, donnees: DonneesRapportPdf): Promise<string> {
-    if (!fs.existsSync(DOSSIER_STORAGE)) {
-      fs.mkdirSync(DOSSIER_STORAGE, { recursive: true });
-    }
+  async genererPdfRapport(donnees: DonneesRapportPdf): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const doc = new PDFDocument({ margin: 40, size: 'A4' });
+      const buffers: Buffer[] = [];
 
-    const html = construireHtml(donnees);
-    const nomFichier = `rapport-${reportId}.pdf`;
-    const cheminAbsolu = path.join(DOSSIER_STORAGE, nomFichier);
+      doc.on('data', (chunk) => buffers.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('error', reject);
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-    try {
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
-      await page.pdf({
-        path: cheminAbsolu,
-        format: 'A4',
-        printBackground: true,
-        margin: { top: '20px', bottom: '20px', left: '20px', right: '20px' },
+      const largeurPage = doc.page.width - 80; // marges 40px de chaque côté
+
+      // ── EN-TÊTE ──
+      doc.rect(0, 0, doc.page.width, 80).fill(VERT_PRIMAIRE);
+      doc.fillColor('white').fontSize(20).font('Helvetica-Bold')
+        .text('BCX Finance', 40, 20);
+      doc.fontSize(11).font('Helvetica')
+        .text(`Rapport financier — ${NOMS_MOIS[donnees.mois - 1]} ${donnees.annee}`, 40, 48);
+      doc.fillColor('#1a1a1a').moveDown(2);
+
+      let y = 100;
+
+      // ── IDENTITÉ ──
+      doc.rect(40, y, largeurPage, 20).fill(GRIS_CLAIR);
+      doc.fillColor(VERT_PRIMAIRE).fontSize(11).font('Helvetica-Bold')
+        .text('Identite du commercant', 44, y + 5);
+      y += 25;
+
+      const infos = [
+        ['Nom', donnees.user.nom],
+        ['Telephone', donnees.user.telephone],
+        ['Entreprise', donnees.user.entreprise],
+        ['Ville', donnees.user.ville],
+      ];
+
+      for (const [label, valeur] of infos) {
+        doc.fillColor(GRIS).fontSize(10).font('Helvetica').text(label, 44, y);
+        doc.fillColor('#1a1a1a').text(valeur, 200, y);
+        y += 18;
+      }
+      y += 10;
+
+      // ── SCORE BCX ──
+      doc.rect(40, y, largeurPage, 60).fill(VERT_PRIMAIRE);
+      doc.fillColor('white').fontSize(11).font('Helvetica').text('Score BCX', 52, y + 8);
+      doc.fontSize(22).font('Helvetica-Bold')
+        .text(`${donnees.scoreBcx} / 100`, 52, y + 22);
+      doc.fontSize(11).font('Helvetica')
+        .text(interpreterScore(donnees.scoreBcx), 52, y + 44);
+      y += 75;
+
+      // ── RÉCAPITULATIF FINANCIER ──
+      doc.rect(40, y, largeurPage, 20).fill(GRIS_CLAIR);
+      doc.fillColor(VERT_PRIMAIRE).fontSize(11).font('Helvetica-Bold')
+        .text('Recapitulatif financier', 44, y + 5);
+      y += 25;
+
+      const recap = [
+        ['Total des recettes', formatMontant(donnees.totalRecettes), VERT_CLAIR],
+        ['Total des depenses', formatMontant(donnees.totalDepenses), ROUGE],
+        ['Solde net', formatMontant(donnees.soldeNet), '#1a1a1a'],
+      ];
+
+      for (const [label, valeur, couleur] of recap) {
+        doc.fillColor(GRIS).fontSize(10).font('Helvetica').text(label, 44, y);
+        doc.fillColor(couleur).font('Helvetica-Bold').text(valeur, 200, y);
+        y += 18;
+      }
+      y += 10;
+
+      // ── TRANSACTIONS ──
+      if (y > doc.page.height - 150) { doc.addPage(); y = 40; }
+
+      doc.rect(40, y, largeurPage, 20).fill(GRIS_CLAIR);
+      doc.fillColor(VERT_PRIMAIRE).fontSize(11).font('Helvetica-Bold')
+        .text('Transactions du mois', 44, y + 5);
+      y += 25;
+
+      // En-têtes du tableau
+      const colX = [40, 120, 220, 330, 450];
+      doc.rect(40, y, largeurPage, 18).fill(VERT_PRIMAIRE);
+      doc.fillColor('white').fontSize(9).font('Helvetica-Bold');
+      ['Date', 'Categorie', 'Description', 'Type', 'Montant'].forEach((col, i) => {
+        doc.text(col, colX[i] + 2, y + 5);
       });
-    } finally {
-      await browser.close();
-    }
+      y += 20;
 
-    return path.join('storage', 'reports', nomFichier);
-  }
+      if (donnees.transactions.length === 0) {
+        doc.fillColor(GRIS).fontSize(10).font('Helvetica')
+          .text('Aucune transaction enregistree ce mois.', 44, y);
+        y += 20;
+      } else {
+        for (const [i, t] of donnees.transactions.entries()) {
+          if (y > doc.page.height - 60) { doc.addPage(); y = 40; }
+          if (i % 2 === 0) doc.rect(40, y, largeurPage, 16).fill('#F9FAFB');
+          doc.fillColor('#1a1a1a').fontSize(9).font('Helvetica');
+          doc.text(t.date, colX[0] + 2, y + 3, { width: 75 });
+          doc.text(t.categorie, colX[1] + 2, y + 3, { width: 95 });
+          doc.text(t.description || '-', colX[2] + 2, y + 3, { width: 105 });
+          doc.fillColor(t.type === 'recette' ? VERT_CLAIR : ROUGE)
+            .text(t.type === 'recette' ? 'Recette' : 'Depense', colX[3] + 2, y + 3);
+          doc.fillColor(t.type === 'recette' ? VERT_CLAIR : ROUGE)
+            .text(formatMontant(t.montant), colX[4] + 2, y + 3);
+          y += 17;
+        }
+      }
+      y += 10;
 
-  cheminAbsoluDepuisRelatif(cheminRelatif: string): string {
-    return path.join(process.cwd(), cheminRelatif);
+      // ── INSIGHTS ──
+      if (donnees.insights.length > 0) {
+        if (y > doc.page.height - 100) { doc.addPage(); y = 40; }
+
+        doc.rect(40, y, largeurPage, 20).fill(GRIS_CLAIR);
+        doc.fillColor(VERT_PRIMAIRE).fontSize(11).font('Helvetica-Bold')
+          .text('Insights', 44, y + 5);
+        y += 25;
+
+        for (const insight of donnees.insights) {
+          if (y > doc.page.height - 40) { doc.addPage(); y = 40; }
+          const niveauCouleur = insight.niveau === 'bon' ? VERT_CLAIR
+            : insight.niveau === 'critique' ? ROUGE : '#E65100';
+          doc.fillColor(niveauCouleur).fontSize(9).font('Helvetica-Bold')
+            .text(`[${insight.niveau.toUpperCase()}]`, 44, y);
+          doc.fillColor('#1a1a1a').font('Helvetica')
+            .text(insight.message, 110, y, { width: largeurPage - 75 });
+          y += 20;
+        }
+      }
+
+      // ── PIED DE PAGE ──
+      const date = new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
+      doc.fontSize(9).fillColor(GRIS)
+        .text(`Document genere par BCX Finance le ${date}`, 40, doc.page.height - 40, {
+          align: 'center',
+          width: largeurPage,
+        });
+
+      doc.end();
+    });
   }
 }

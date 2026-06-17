@@ -11,15 +11,21 @@ type AuthUser = { userId: string };
 export class ReportsController {
   constructor(private reportsService: ReportsService) {}
 
-  // Télécharge le rapport en PDF (déclaré avant :mois/:annee pour éviter une collision de route)
+  // Génère le PDF en mémoire et l'envoie directement en réponse HTTP
+  // (pas de fichier sur disque — compatible avec les hébergeurs sans stockage persistant)
   @Get(':id/pdf')
   async downloadPdf(
     @CurrentUser() user: AuthUser,
     @Param('id') id: string,
     @Res() res: Response,
   ) {
-    const cheminAbsolu = await this.reportsService.genererPdf(id, user.userId);
-    res.download(cheminAbsolu);
+    const pdfBuffer = await this.reportsService.genererPdf(id, user.userId);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="rapport-bcx-${id}.pdf"`,
+      'Content-Length': pdfBuffer.length,
+    });
+    res.end(pdfBuffer);
   }
 
   // Génère/retourne (cache 24h) le rapport mensuel avec score et insights
