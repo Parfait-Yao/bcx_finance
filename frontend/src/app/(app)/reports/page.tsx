@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Loader2, Download, ChevronLeft, ChevronRight, AlertTriangle, CheckCircle, AlertCircle } from 'lucide-react';
 import { api, getAccessToken } from '@/lib/api';
 import { Report } from '@/lib/types';
 import { formaterMontant, NOMS_MOIS } from '@/lib/format';
 import ScoreGauge from '@/components/ScoreGauge';
+import OfflineDataBanner from '@/components/OfflineDataBanner';
 
 function interpreterScore(score: number) {
   if (score >= 70) return 'Bon';
@@ -31,15 +32,34 @@ export default function ReportsPage() {
   const [annee, setAnnee] = useState(maintenant.getFullYear());
   const [report, setReport] = useState<Report | null>(null);
   const [chargement, setChargement] = useState(true);
+  const [horsLigne, setHorsLigne] = useState(false);
+
+  const charger = useCallback(async () => {
+    setChargement(true);
+    const cleCache = `bcx_cache_report_${mois}_${annee}`;
+    // Affiche le cache immédiatement si disponible
+    try {
+      const cache = localStorage.getItem(cleCache);
+      if (cache) setReport(JSON.parse(cache));
+    } catch { /* ignore */ }
+
+    try {
+      const res = await api.get<Report>(`/reports/${mois}/${annee}`);
+      setReport(res.data);
+      setHorsLigne(false);
+      try { localStorage.setItem(cleCache, JSON.stringify(res.data)); } catch { /* quota */ }
+    } catch {
+      setHorsLigne(true);
+    } finally {
+      setChargement(false);
+    }
+  }, [mois, annee]);
 
   useEffect(() => {
-    setChargement(true);
-    api
-      .get<Report>(`/reports/${mois}/${annee}`)
-      .then((res) => setReport(res.data))
-      .catch(() => setReport(null))
-      .finally(() => setChargement(false));
-  }, [mois, annee]);
+    charger();
+    window.addEventListener('online', charger);
+    return () => window.removeEventListener('online', charger);
+  }, [charger]);
 
   function changerMois(delta: number) {
     let nouveauMois = mois + delta;
@@ -70,6 +90,7 @@ export default function ReportsPage() {
 
   return (
       <main className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
+        {horsLigne && <OfflineDataBanner />}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Rapport mensuel</h1>
           <div className="flex items-center gap-2">

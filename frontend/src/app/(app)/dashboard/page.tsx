@@ -1,18 +1,19 @@
 'use client';
 
 import { Wallet, TrendingUp, TrendingDown, Loader2 } from 'lucide-react';
-import { usePolling } from '@/lib/usePolling';
+import { useOfflineCache } from '@/lib/useOfflineCache';
 import { Dashboard } from '@/lib/types';
 import { formaterMontant, formaterDate } from '@/lib/format';
 import ScoreGauge from '@/components/ScoreGauge';
 import MetricCard from '@/components/MetricCard';
 import EvolutionChart from '@/components/EvolutionChart';
 import AlertsPreview from '@/components/AlertsPreview';
+import OfflineDataBanner from '@/components/OfflineDataBanner';
 
 export default function DashboardPage() {
-  const { data, chargement } = usePolling<Dashboard>('/dashboard');
+  const { data, chargement, horsLigne } = useOfflineCache<Dashboard>('/dashboard', 'dashboard');
 
-  if (chargement) {
+  if (chargement && !data) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <Loader2 className="animate-spin text-primaire" size={32} />
@@ -22,14 +23,18 @@ export default function DashboardPage() {
 
   if (!data) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-gray-500">
-        Impossible de charger le tableau de bord.
+      <div className="min-h-[60vh] flex items-center justify-center text-gray-500 px-4 text-center">
+        <div>
+          <p className="font-semibold mb-1">Pas de connexion internet</p>
+          <p className="text-sm">Visitez cette page une première fois avec internet pour la voir hors-ligne.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <main className="max-w-4xl mx-auto px-4 pt-6 space-y-6">
+      {horsLigne && <OfflineDataBanner />}
 
       <div className="min-w-0">
         <p className="text-sm text-gray-500 font-medium">Bonjour 👋</p>
