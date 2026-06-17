@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
-import PageTransition from '@/components/PageTransition';
 import NavigationProgress from '@/components/NavigationProgress';
 
 export const metadata: Metadata = {
@@ -37,9 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-fond min-h-screen">
         <NavigationProgress />
         <ServiceWorkerRegister />
-        <PageTransition>
-          {children}
-        </PageTransition>
+        {children}
       </body>
     </html>
   );

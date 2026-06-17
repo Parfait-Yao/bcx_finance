@@ -50,7 +50,7 @@ export class UsersService {
     const [user, transactionsMois, dernieresTransactions, recettesMoisPrecedents] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: userId },
-        select: { createdAt: true },
+        select: { createdAt: true, nom: true, entreprise: true },
       }),
       this.prisma.transaction.findMany({
         where: { userId, dateTransaction: { gte: debutMois, lte: finMois } },
@@ -97,6 +97,8 @@ export class UsersService {
     });
 
     return {
+      nom: user.nom,
+      entreprise: user.entreprise,
       solde: totalRecettes - totalDepenses,
       recettesMois: totalRecettes,
       depensesMois: totalDepenses,

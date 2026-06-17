@@ -5,8 +5,6 @@ import { Loader2, Bell, BellRing, Sparkles, X } from 'lucide-react';
 import { api } from '@/lib/api';
 import { NotificationItem } from '@/lib/types';
 import { formaterDate } from '@/lib/format';
-import NavBar from '@/components/NavBar';
-import OfflineBanner from '@/components/OfflineBanner';
 
 const LIBELLES_TYPE: Record<string, string> = {
   tresorerie_faible: 'Trésorerie faible',
@@ -41,10 +39,6 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="md:pl-60 pb-20 md:pb-8">
-      <OfflineBanner />
-      <NavBar />
-
       <main className="max-w-2xl mx-auto px-4 pt-6 space-y-4">
         <h1 className="text-2xl font-bold">Notifications</h1>
 
@@ -91,6 +85,5 @@ export default function NotificationsPage() {
           </ul>
         )}
       </main>
-    </div>
   );
 }

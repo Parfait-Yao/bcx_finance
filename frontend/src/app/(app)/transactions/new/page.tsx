@@ -6,8 +6,6 @@ import { Loader2, Check, CloudOff } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Categorie, TypeTransaction } from '@/lib/types';
 import { creerTransactionAvecOffline } from '@/lib/offline';
-import NavBar from '@/components/NavBar';
-import OfflineBanner from '@/components/OfflineBanner';
 
 export default function NewTransactionPage() {
   const router = useRouter();
@@ -56,10 +54,6 @@ export default function NewTransactionPage() {
   }
 
   return (
-    <div className="md:pl-60 pb-20 md:pb-8">
-      <OfflineBanner />
-      <NavBar />
-
       <main className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
         <h1 className="text-2xl font-bold">Nouvelle transaction</h1>
 
@@ -169,6 +163,5 @@ export default function NewTransactionPage() {
           )}
         </form>
       </main>
-    </div>
   );
 }

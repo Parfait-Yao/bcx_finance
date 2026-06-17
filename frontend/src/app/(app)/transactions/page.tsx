@@ -6,8 +6,6 @@ import { api } from '@/lib/api';
 import { Transaction, TypeTransaction } from '@/lib/types';
 import { formaterMontant, formaterDate } from '@/lib/format';
 import { lirePendantTransactions } from '@/lib/offline';
-import NavBar from '@/components/NavBar';
-import OfflineBanner from '@/components/OfflineBanner';
 import EditTransactionModal from '@/components/EditTransactionModal';
 
 interface ReponsePaginee {
@@ -91,10 +89,7 @@ export default function TransactionsPage() {
   const groupes = grouperParDate(toutesLesTransactions);
 
   return (
-    <div className="md:pl-60 pb-20 md:pb-8">
-      <OfflineBanner />
-      <NavBar />
-
+    <>
       <main className="max-w-2xl mx-auto px-4 pt-6 space-y-4">
         <h1 className="text-2xl font-bold">Historique des transactions</h1>
 
@@ -202,6 +197,6 @@ export default function TransactionsPage() {
           }}
         />
       )}
-    </div>
+    </>
   );
 }

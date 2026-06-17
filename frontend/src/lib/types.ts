@@ -23,6 +23,8 @@ export interface Transaction {
 }
 
 export interface Dashboard {
+  nom: string;
+  entreprise: string;
   solde: number;
   recettesMois: number;
   depensesMois: number;

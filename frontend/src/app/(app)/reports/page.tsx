@@ -5,8 +5,6 @@ import { Loader2, Download, ChevronLeft, ChevronRight, AlertTriangle, CheckCircl
 import { api, getAccessToken } from '@/lib/api';
 import { Report } from '@/lib/types';
 import { formaterMontant, NOMS_MOIS } from '@/lib/format';
-import NavBar from '@/components/NavBar';
-import OfflineBanner from '@/components/OfflineBanner';
 import ScoreGauge from '@/components/ScoreGauge';
 
 function interpreterScore(score: number) {
@@ -71,10 +69,6 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="md:pl-60 pb-20 md:pb-8">
-      <OfflineBanner />
-      <NavBar />
-
       <main className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Rapport mensuel</h1>
@@ -159,6 +153,5 @@ export default function ReportsPage() {
           </>
         )}
       </main>
-    </div>
   );
 }
