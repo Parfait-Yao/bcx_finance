@@ -39,8 +39,14 @@ const NOMS_MOIS = [
   'Juillet','Août','Septembre','Octobre','Novembre','Décembre',
 ];
 
+// Formate un montant avec des espaces comme séparateurs de milliers,
+// sans dépendre de toLocaleString (dont le comportement varie selon
+// la locale du serveur — sur Render/Linux peut produire des "/" ou ",").
 function formatMontant(valeur: number): string {
-  return `${Math.round(valeur).toLocaleString('fr-FR')} F CFA`;
+  const entier = Math.round(valeur);
+  const str = String(entier);
+  const resultat = str.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  return `${resultat} F CFA`;
 }
 
 function interpreterScore(score: number): string {
